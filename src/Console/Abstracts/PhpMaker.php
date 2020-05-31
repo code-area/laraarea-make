@@ -136,7 +136,12 @@ abstract class PhpMaker extends BaseMaker
     protected function makeBasedDb($dbStructure, $content)
     {
         foreach ($dbStructure as $table => $columnsInfo) {
+            $this->setOptions();
+            $this->__confirm = true;
+            $this->__confirmOverwrite = true;
+            $this->setArguments();
             $this->__pattern = $this->processInput('pattern', $table);
+            $this->pattern = $this->__pattern;
             $this->createFileBy($this->__pattern, $content);
         }
     }

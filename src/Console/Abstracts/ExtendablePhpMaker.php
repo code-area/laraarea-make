@@ -78,10 +78,7 @@ abstract class ExtendablePhpMaker extends PhpMaker
             }
         }
 
-        foreach ($dbStructure as $table => $columnsInfo) {
-            $this->__pattern = $this->processInput('pattern', $table);
-            $this->createFileBy($this->__pattern, $content);
-        }
+        parent::makeBasedDb($dbStructure, $content);
     }
 
     /**

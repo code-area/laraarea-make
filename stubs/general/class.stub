@@ -1,0 +1,16 @@
+<?php
+
+{{namespace}}
+
+{{use}}
+
+{{abstract}} class {{pattern}} {{parent}} {{interface}}
+{
+    {{trait}}
+
+    {{constant}}
+
+    {{property}}
+
+    {{method}}
+}
