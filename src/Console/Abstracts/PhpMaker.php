@@ -139,6 +139,7 @@ abstract class PhpMaker extends BaseMaker
             $this->setOptions();
             $this->__confirm = true;
             $this->__confirmOverwrite = true;
+            $this->__choiceDefault = true;
             $this->setArguments();
             $this->__pattern = $this->processInput('pattern', $table);
             $this->pattern = $this->__pattern;
