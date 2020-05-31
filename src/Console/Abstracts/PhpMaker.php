@@ -128,6 +128,20 @@ abstract class PhpMaker extends BaseMaker
     public $__content;
 
     /**
+     * @param $dbStructure
+     * @param $content
+     * @return bool
+     * @throws LaraAreaCommandException
+     */
+    protected function makeBasedDb($dbStructure, $content)
+    {
+        foreach ($dbStructure as $table => $columnsInfo) {
+            $this->__pattern = $this->processInput('pattern', $table);
+            $this->createFileBy($this->__pattern, $content);
+        }
+    }
+
+    /**
      * @param string $path
      * @return string
      */

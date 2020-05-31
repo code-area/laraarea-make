@@ -62,6 +62,29 @@ abstract class ExtendablePhpMaker extends PhpMaker
     }
 
     /**
+     * @param $dbStructure
+     * @param $content
+     * @return bool
+     * @throws LaraAreaCommandException
+     */
+    protected function makeBasedDb($dbStructure, $content)
+    {
+        $this->__confirm = true;
+        $this->__confirmOverwrite = true;
+        if ($this->makeBase) {
+            if (false == $this->createBaseParent($content)) {
+                // @TODO show dont saved message
+                return false;
+            }
+        }
+
+        foreach ($dbStructure as $table => $columnsInfo) {
+            $this->__pattern = $this->processInput('pattern', $table);
+            $this->createFileBy($this->__pattern, $content);
+        }
+    }
+
+    /**
      * @param $patterns
      * @param $stubContent
      * @return bool

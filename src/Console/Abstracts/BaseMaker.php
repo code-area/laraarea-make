@@ -273,7 +273,10 @@ abstract class BaseMaker extends Command
         $path .= 'stubs' . DIRECTORY_SEPARATOR . $stub;
 
         if (! file_exists($path)) {
-            $path = $this->getCommandPath();
+            $reflector = new \ReflectionClass(self::class);
+            $fn = $reflector->getFileName();
+            $callPath = dirname($fn);
+            $path = Str::before($callPath, 'src', 1);
             $path .= 'stubs' . DIRECTORY_SEPARATOR . $stub;
         }
 
