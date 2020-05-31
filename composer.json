@@ -1,0 +1,36 @@
+{
+	"name": "code-area/laraarea-make",
+	"description": "code generator",
+	"keywords": ["laravel", "maker"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Codearea"
+		}
+	],
+	"require": {
+		"laravel/framework": "6.*",
+		"code-area/laraarea-support": "9.0.*"
+	},
+	"require-dev": {
+		"mockery/mockery": "^1.0",
+		"phpunit/phpunit": "^8.0"
+	},
+	"extra": {
+		"laravel": {
+			"providers": [
+				"LaraAreaMake\\ServiceProvider\\LaraAreaMakeServiceProvider"
+			]
+		}
+	},
+	"autoload": {
+		"psr-4": {
+			"LaraAreaMake\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests/"
+		}
+	}
+}
