@@ -49,12 +49,23 @@ trait ReplaceTrait
     /**
      * @var int
      */
-    protected $replaceCount = 0;
+    protected $reportKeywords = false;
 
     /**
      * @var int
      */
-    protected $reportAfterCount = 100;
+    protected $reportStage = false;
+
+    /**
+     * @var int
+     */
+    protected $reportStageAfter = 0;
+
+    /**
+     * @var int
+     */
+    protected $stage  = 0;
+
 
     /**
      * @param $content
@@ -68,7 +79,9 @@ trait ReplaceTrait
 //        Config::set(self::CONFIG_MAKES_PATH, $makes);
 
         foreach ($this->keywords as $keyword => $inputType) {
-            $this->info($keyword);
+            if ($this->reportKeywords) {
+                $this->info($keyword);
+            }
             $keyOption = '__' . $keyword;
 
             if (in_array($keyword, $this->guessKeywords)) {
@@ -205,8 +218,12 @@ trait ReplaceTrait
      */
     protected function reportContentChanges($from, $to, $content)
     {
-        $this->replaceCount++;
-        if ($this->replaceCount < $this->reportAfterCount) {
+        $this->stage++;
+        if (empty($this->reportStage)) {
+            return;
+        }
+
+        if ($this->stage < $this->reportStageAfter) {
             return;
         }
 
@@ -220,7 +237,7 @@ trait ReplaceTrait
             $content = str_replace($from, '<error>' . $from . '</error><info>'. $to . '</info>', $content);
         }
         $this->line($content);
-        $this->comment(sprintf('Replaced [%s] times by [%s] method', $this->replaceCount, $backtrace['function']));
+        $this->comment(sprintf('Replaced [%s] times by [%s] method', $this->stage, $backtrace['function']));
 
         parent::confirm('continue');
     }
