@@ -46,11 +46,11 @@ trait DatabaseTrait
         $dbStructure = LaraAreaDB::getDBStructure();
         $dbTables = $dbStructure->keys()->all();
 
-        if ($pattern == config('laraarea_maker.by_database')) {
+        if ($pattern == config('laraarea_make.by_database')) {
             $tables = $dbTables;
         } else {
             // @TODO ':' make dynamically
-            $str = \Illuminate\Support\Str::replaceFirst(config('laraarea_maker.by_database') . ':', '', $pattern);
+            $str = \Illuminate\Support\Str::replaceFirst(config('laraarea_make.by_database') . ':', '', $pattern);
             $tables = explode(',', $str);
             $diffTables = array_diff($tables, $dbTables);
             if($diffTables) {
@@ -75,6 +75,6 @@ trait DatabaseTrait
      */
     protected function getIgnoreTables()
     {
-        return !empty($this->ignoreTables) ? $this->ignoreTables : config('laraarea_maker.ignore_tables', []);
+        return !empty($this->ignoreTables) ? $this->ignoreTables : config('laraarea_make.ignore_tables', []);
     }
 }

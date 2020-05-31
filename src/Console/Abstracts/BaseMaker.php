@@ -81,7 +81,7 @@ abstract class BaseMaker extends Command
 ////    /**
 ////     * All paths which makes by lara-make it must be set in config path using this
 ////     */
-////    const CONFIG_MAKES_PATH = 'laraarea_makerr.makes';
+////    const CONFIG_MAKES_PATH = 'laraarea_maker.makes';
 //
     /**
      * @var
@@ -231,7 +231,7 @@ abstract class BaseMaker extends Command
         $this->setArguments();
 
         $pattern = parent::argument('pattern');
-        if (is_string($pattern) && \Illuminate\Support\Str::startsWith($pattern, config('laraarea_maker.by_database'))) {
+        if (is_string($pattern) && \Illuminate\Support\Str::startsWith($pattern, config('laraarea_make.by_database'))) {
             return $this->handleBasedDatabase($pattern, $stubContent);
         }
 

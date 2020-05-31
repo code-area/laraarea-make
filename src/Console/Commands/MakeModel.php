@@ -185,7 +185,7 @@ class MakeModel extends ClassMaker
     {
         return !empty($this->notFillableColumns)
             ? $this->notFillableColumns
-            : config('laraarea_maker.not_fillable_columns', []);
+            : config('laraarea_make.not_fillable_columns', []);
     }
 
     /**
@@ -195,7 +195,7 @@ class MakeModel extends ClassMaker
     {
         $config = !empty($this->notFillableTableColumns)
             ? $this->notFillableTableColumns:
-            config('laraarea_maker.not_fillable_table_columns', []);
+            config('laraarea_make.not_fillable_table_columns', []);
 
         return $config[$table] ?? [];
     }
