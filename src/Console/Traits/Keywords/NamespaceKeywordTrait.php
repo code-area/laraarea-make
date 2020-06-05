@@ -2,12 +2,22 @@
 
 namespace LaraAreaMake\Console\Traits\Keywords;
 
+use Illuminate\Support\Str;
+
 trait NamespaceKeywordTrait
 {
     /**
      * @var
      */
     public $__namespace;
+
+    /**
+     * @var array
+     */
+    public $noNamespacePaths = [
+        'routes',
+        'config',
+    ];
 
     /**
      * @param $input
@@ -33,7 +43,16 @@ trait NamespaceKeywordTrait
         }
 
         $classMap = (array) data_get($composer, 'autoload.classmap');
-        // @TODO more properly
+        $path = str_replace('\\', '/', $path);
+        if (in_array($path, $classMap)) {
+            return null;
+        }
+
+        if (Str::startsWith($path, $this->noNamespacePaths)) {
+            return null;
+        }
+
+		// TODO add in compose.json autoload.psr-4
         return ucfirst($path);
     }
 
