@@ -95,13 +95,23 @@ trait UseKeywordTrait
         $baseName = class_basename($namespace);
         if (empty($this->shortNamespaces[$baseName])) {
             $this->shortNamespaces[$baseName] = $namespace;
-            if ($isDynamicNamespace) {
+
+            // for prevent single namespace use as *use*;
+            if ($isDynamicNamespace && ($baseName != $namespace)) {
                 $this->namespaces[] = $namespace;
             }
+
+            return $isShort ? $baseName : $this->shortNamespaces[$baseName];
+        } elseif ($this->shortNamespaces[$baseName] == $namespace) {
             return $isShort ? $baseName : $this->shortNamespaces[$baseName];
         }
 
         if (\Illuminate\Support\Str::startsWith($namespace, $this->__namespace)) {
+            /**
+             * TODO check
+             * php artisan area-make:test Test22 --path=vvv --confirm-overwrite --trait="TestNamespace\TestClass,TestNamespace2\TestClass,TestNamespace3\TestNamespace2TestClass"
+             * php artisan area-make:test Test23 --path=vvv --confirm-overwrite --trait="TestNamespace\TestClass,TestNamespace3\TestNamespace2TestClass,TestNamespace2\TestClass"
+             */
             $_namespace = \Illuminate\Support\Str::replaceFirst($this->__namespace . DIRECTORY_SEPARATOR, '', $namespace);
             if( false == strpos($_namespace, DIRECTORY_SEPARATOR)) {
                 $oldNamespace = $this->shortNamespaces[$baseName];
@@ -119,14 +129,11 @@ trait UseKeywordTrait
 
                 return $isShort ? $baseName : $this->shortNamespaces[$baseName];
             }
-            // @TODO
         }
 
         $_namespace = \Illuminate\Support\Str::replaceLast(DIRECTORY_SEPARATOR, '', $namespace);
         $namespace = $this->correctDuplicateNamespace($namespace, $isShort, $_namespace);
-        if ($isDynamicNamespace) {
-            $this->namespaces[] = $namespace;
-        }
+        $this->addInNamespacesBased($namespace, $isDynamicNamespace, $isShort);
 
         return $namespace;
     }
@@ -143,12 +150,36 @@ trait UseKeywordTrait
         $baseName = class_basename($_namespace);
 
         if (! empty($this->shortNamespaces[$baseName])) {
+            if ($baseName == $_namespace) {
+                $this->shortNamespaces[$namespace] = $namespace;
+                return $namespace;
+            }
+
             $_namespace = \Illuminate\Support\Str::replaceLast(DIRECTORY_SEPARATOR, '', $_namespace);
             return $this->correctDuplicateNamespace($namespace, $isShort, $_namespace);
         }
 
         $this->shortNamespaces[$baseName] = $namespace . ' as ' . $baseName;
         return $isShort ? $baseName : $this->shortNamespaces[$baseName];
+    }
+
+    /**
+     * @param $namespace
+     * @param $isDynamicNamespace
+     * @param $isShort
+     */
+    protected function addInNamespacesBased($namespace, $isDynamicNamespace, $isShort)
+    {
+        if ($isDynamicNamespace) {
+            if ($isShort) {
+                if (isset($this->shortNamespaces[$namespace]) && $this->shortNamespaces[$namespace] != $namespace) {
+                    $this->namespaces[] = $this->shortNamespaces[$namespace];
+                }
+
+            } else {
+                $this->namespaces[] = $namespace;
+            }
+        }
     }
 
 }

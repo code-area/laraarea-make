@@ -1,8 +1,10 @@
 <?php
 
-namespace LaraAreaMake\Console\Commands\App\Models;
+namespace LaraAreaMake\Console\Commands;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use LaraAreaMake\Console\Abstracts\ClassMaker;
 use LaraAreaMake\Exceptions\LaraAreaCommandException;
 
@@ -20,8 +22,6 @@ class MakeModel extends ClassMaker
      * @var string
      */
     public $signature  = 'area-make:model {pattern}';
-
-
 
     /**
      * @var string
@@ -44,6 +44,8 @@ class MakeModel extends ClassMaker
      */
     public $makeBase = true;
 
+
+
     /**
      * @var string
      */
@@ -64,16 +66,19 @@ class MakeModel extends ClassMaker
     {
         $this->__confirm = true;
         $this->__confirmOverwrite = true;
+
         if ($this->makeBase) {
+            $this->__abstract = true;
             if (false == $this->createBaseParent($content)) {
                 // @TODO show dont saved message
                 return false;
             }
+            $this->__abstract = false;
         }
 
         $data = [];
         $notFillableColumns = $this->getNotFillableColumns();
-        foreach ($dbStructure as $table => $columnsInfo) {
+        foreach ($this->fullDbStructure as $table => $columnsInfo) {
             $pattern = \Illuminate\Support\Str::singular(\Illuminate\Support\Str::title($table));
             $pattern = str_replace('_', '', $pattern);
             $data[$table]['pattern'] = $pattern;
@@ -90,22 +95,22 @@ class MakeModel extends ClassMaker
                 }
 
                 $data[$table]['columns'][] = $column;
-//                $data[$table]['const']['default_columns'][] = $column;
                 if (\Illuminate\Support\Str::endsWith($column, '_id')) {
                     $relation = \Illuminate\Support\Str::replaceLast('_id', '', $column);
                     $data[$table]['methods']['belongs_to'][] = $relation;
                     $data[\Illuminate\Support\Str::plural($relation)]['methods']['has_many'][] = $table;
                 }
-//                if (in_array($_data['type'], ['char','varchar'])) {
-//                    $data[$table]['listable'][$column] = $_data['length'];
-//                }
             }
         }
-
+        $ignoreTables = $this->getIgnoreTables();
         foreach ($data as $table => $info) {
-            if (in_array($table, $this->ignoreTables)) {
+            if (in_array($table, $ignoreTables)) {
                 continue;
             }
+            if (! in_array($table, array_keys($dbStructure))) {
+                continue;
+            }
+
             $this->__use = [];
             if (!isset($info['pattern'])) {
                 continue;
@@ -119,28 +124,13 @@ class MakeModel extends ClassMaker
 
             $this->__property['public'] = [
                 'fillable' => $info['columns'],
-//                'indexable' => [],
-//                'showable' => [],
-//                'listable' => [],
-//                '_relations' => [],
             ];
-
-//            if (!empty($info['listable'])) {
-//                $listable = $info['listable'];
-//                $listable = array_flip(array_reverse($listable));
-//                ksort($listable);
-//                $this->__property['public']['listable'] = [
-//                    'name' => head($listable),
-//                    'value' => head($listable)
-//                ];
-//            }
 
             if (!empty($info['const'])) {
                 foreach ($info['const'] as $const => $value) {
                     $this->__constant[strtoupper($const)] = $value;
                 }
             }
-
 
             if (!empty($info['methods'])) {
                 $methods = [];
@@ -154,9 +144,15 @@ class MakeModel extends ClassMaker
                         $methods[] = [
                             'name' => $relation,
                             'content' => $template,
+                            'comment' => [
+                                'return' => [
+                                    $this->processNamespace(BelongsTo::class)
+                                ]
+                            ]
                         ];
                     }
                 }
+
                 if (!empty($info['methods']['has_many'])) {
                     foreach ($info['methods']['has_many'] as $_table) {
                         $template = empty($data[$_table]['pattern'])
@@ -165,6 +161,11 @@ class MakeModel extends ClassMaker
                         $methods[] = [
                             'name' => $_table,
                             'content' => $template,
+                            'comment' => [
+                                'return' => [
+                                    $this->processNamespace(HasMany::class)
+                                ]
+                            ]
                         ];
                     }
                 }

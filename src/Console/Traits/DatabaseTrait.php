@@ -8,32 +8,76 @@ use LaraAreaSupport\Facades\LaraAreaDB;
 trait DatabaseTrait
 {
     /**
+     * @var
+     */
+    protected $dbStructure;
+
+    /**
+     * @var
+     */
+    protected $fullDbStructure;
+
+    /**
+     * @var
+     */
+    protected $table;
+
+    /**
+     * @var
+     */
+    protected $tableColumns;
+
+    /**
      * @var array
      */
     public $ignoreTables = [];
 
     /**
-     * @var
-     */
-    public $ignoreTableColumns;
-
-    /**
      * @param $pattern
      * @param $stubContent
-     * @return mixed
+     * @return bool
      * @throws LaraAreaCommandException
      */
     public function handleBasedDatabase($pattern, $stubContent)
     {
         // @TODO make based config.file
-        if(method_exists($this, 'makeBasedDb')) {
-            $dbStructure = $this->getDatabaseStructure($pattern);
-            return $this->makeBasedDb($dbStructure, $stubContent);
-        }
-        $message = sprintf('%s must be contain makeBasedDb method', get_class($this));
-        throw new LaraAreaCommandException($message);
+        $dbStructure = $this->getDatabaseStructure($pattern);
+        return $this->makeBasedDb($dbStructure, $stubContent);
     }
 
+    /**
+     * @param $dbStructure
+     * @param $content
+     * @return bool
+     */
+    protected function makeBasedDb($dbStructure, $content)
+    {
+        $this->dbStructure = collect($dbStructure);
+        foreach ($dbStructure as $table => $columnsInfo) {
+            $this->setOptions();
+            $this->__confirm = true;
+            $this->__confirmOverwrite = true;
+            $this->__choiceDefault = true;
+
+            $this->setArguments();
+            $this->__pattern = $this->processInput('pattern', $table);
+            $this->setDatabaseOptions($table, $columnsInfo);
+            $this->createFileBy($this->__pattern, $content);
+        }
+        return true;
+    }
+
+    /**
+     * @param $table
+     * @param $columnsInfo
+     */
+    protected function setDatabaseOptions($table, $columnsInfo)
+    {
+        $this->__pattern = $this->processInput('pattern', $table);
+        $this->pattern = $this->__pattern;
+        $this->table = $table;
+        $this->tableColumns = $columnsInfo;
+    }
 
     /**
      * @param $pattern
@@ -44,6 +88,7 @@ trait DatabaseTrait
     public function getDatabaseStructure($pattern)
     {
         $dbStructure = LaraAreaDB::getDBStructure();
+        $this->fullDbStructure = $dbStructure->toArray();
         $dbTables = $dbStructure->keys()->all();
 
         if ($pattern == config('laraarea_make.by_database')) {

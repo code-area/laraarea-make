@@ -2,6 +2,7 @@
 
 namespace LaraAreaMake\Console\Traits\Keywords;
 
+use Illuminate\Support\Arr;
 use LaraAreaMake\Exceptions\LaraAreaCommandException;
 
 trait MethodKeywordTrait
@@ -11,17 +12,20 @@ trait MethodKeywordTrait
      */
     protected $__method;
 
-////        $methods = [
-////            'public' => [
-////                [
-////                    'name' => '__construct',
-////                    'arguments' => ['name', 'str' => 'sas'],
-////                    'content' => 'return true;'
-////                ]
-////            ]
-////        ];
-//
-//
+//        $methods = [
+//            'public' => [
+//                [
+//                    'name' => '__construct',
+//                    'arguments' => ['name', 'str' => 'sas'],
+//                    'content' => 'return true;'
+//                    'comment' => [
+//                        'description' => ['aaa', 'bbbb'],
+//                        'return' => ['bool', 'string'],
+//                        'throws' => ['LaraAreaCommandException', 'Exception']
+//                ]
+//            ]
+//        ];
+
     /**
      * @param $content
      * @param $keyword
@@ -36,7 +40,7 @@ trait MethodKeywordTrait
                 return $this->replaceContent($keyword, '', $content);
             }
 
-            return $this->replaceContent(TAB . PHP_EOL . TAB . $keyword . PHP_EOL, '', $content);
+            return $this->replaceContent(PHP_EOL .TAB . $keyword . PHP_EOL, '', $content);
         }
 
         if (is_string($input)) {
@@ -65,10 +69,62 @@ trait MethodKeywordTrait
         $str = '';
         foreach ($methods as $type => $_methods) {
             foreach ($_methods as $methodData) {
+                $str .= $this->getMethodComment($methodData);
                 $str .= $this->insertMethodBased($type, $methodData);
             }
         }
         return $str;
+    }
+
+    /**
+     * @param $methodData
+     * @return string
+     */
+    protected function getMethodComment($methodData)
+    {
+        $commentStr = TAB . '/**' . PHP_EOL;
+        $commentStr .= $this->processMethodComment($methodData);
+        unset($methodData['comment']);
+        return $commentStr . TAB . ' */' . PHP_EOL;
+    }
+
+    /**
+     * @param $methodData
+     * @return string
+     */
+    protected function processMethodComment($methodData)
+    {
+        if (empty($methodData['comment']) || ! is_array($methodData['comment'])) {
+            if (! empty($methodData['arguments'])) {
+                $params = Arr::wrap($methodData['arguments']);
+                return TAB . ' * @param ' . implode(PHP_EOL . TAB . ' * @param ', $params) . PHP_EOL ;
+            }
+
+            return TAB . ' *' . PHP_EOL;
+        }
+        $commentStr = '';
+        $commentData = $methodData['comment'];
+
+        if (! empty($commentData['description'])) {
+            $description= Arr::wrap($commentData['description']);
+            $commentStr .= TAB . ' * ' . implode(PHP_EOL . TAB . ' * ', $description) . PHP_EOL . TAB . ' * ' . PHP_EOL ;
+        }
+
+        if (! empty($methodData['arguments'])) {
+            $params = Arr::wrap($methodData['arguments']);
+            $commentStr .= TAB . ' * @param ' . implode(PHP_EOL . TAB . ' * @param ', $params) . PHP_EOL ;
+        }
+
+        if (! empty($commentData['return'])) {
+            $return = Arr::wrap($commentData['return']);
+            $commentStr .= TAB . ' *' . ' @return ' . implode('|', $return) . PHP_EOL;
+        }
+        if (! empty($commentData['throws'])) {
+            $throws = Arr::wrap($commentData['throws']);
+            $commentStr .= TAB . ' *' . ' @throws ' . implode('|', $throws) . PHP_EOL;
+        }
+
+        return $commentStr;
     }
 
     /**

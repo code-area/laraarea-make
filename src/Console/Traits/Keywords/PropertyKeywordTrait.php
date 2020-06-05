@@ -4,11 +4,16 @@ namespace LaraAreaMake\Console\Traits\Keywords;
 
 trait PropertyKeywordTrait
 {
-
     /**
      * @var
      */
     protected $__property;
+
+//        $property = [
+//            'public' => [
+//                 'name' => 'test',
+//            ]
+//        ];
 
     /**
      * @param $content
@@ -18,6 +23,10 @@ trait PropertyKeywordTrait
      */
     public function replacePropertyKeyword($content, $keyword, $input)
     {
+        if (empty($input)) {
+            return $this->replaceContent(PHP_EOL .TAB . $keyword . PHP_EOL, '', $content);
+        }
+
         $str = '';
         if (is_string($input)) {
             $input = $this->processSpecialSymbols($input, 'PHP_EOL', PHP_EOL);
@@ -30,11 +39,6 @@ trait PropertyKeywordTrait
             $str = $this->insertProperties($property);
         }
 
-        if (empty($str)) {
-            return $this->replaceContent(TAB . PHP_EOL . TAB . $keyword . PHP_EOL, '', $content);
-        }
-
-        $str = rtrim($str, PHP_EOL . PHP_EOL . TAB);
         return $this->replaceContent($keyword, $str, $content);
     }
 
@@ -44,17 +48,17 @@ trait PropertyKeywordTrait
      */
     protected function insertProperties($properties)
     {
-        $str = '';
+        $data = [];
         foreach ($properties as $type => $propertiesData) {
             foreach ($propertiesData as $property => $value) {
                 if (is_numeric($property)) {
                     $property = $value;
                     $value = null;
                 }
-                $str .= $this->insertPropertyBased($type, $property, $value);
+                $data[] = $this->insertPropertyBased($type, $property, $value);
             }
         }
-        return $str;
+        return implode(PHP_EOL . PHP_EOL . TAB, $data);
     }
 
     /**
@@ -67,7 +71,6 @@ trait PropertyKeywordTrait
     {
         $propertyStr = $type . ' ';
         $propertyStr .= $this->parser->parseAttribute($property, $value, '=', ';', 2);
-        $propertyStr .= PHP_EOL . PHP_EOL . TAB;
         return $propertyStr;
     }
 //

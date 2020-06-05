@@ -18,7 +18,7 @@ trait ConstantKeywordTrait
     public function replaceConstantKeyword($content, $keyword, $input)
     {
         if (empty($input)) {
-            return $this->replaceContent(TAB . PHP_EOL . TAB . $keyword . PHP_EOL, '', $content);
+            return $this->replaceContent(PHP_EOL .TAB . $keyword . PHP_EOL, '', $content);
         }
 
         if (is_string($input)) {
@@ -30,17 +30,16 @@ trait ConstantKeywordTrait
         $input = (array) $input;
         // @TODO generalize it and processInputIsArray check in dynamicallyParseOptionInput
 
-        $str = '';
+        $data = [];
         foreach ($input as $constant => $input) {
             // @TODO fix
             $template = $this->parser->parseAttribute($constant, $input, '=', ';', 2);
             $template = \Illuminate\Support\Str::replaceFirst('$', '', $template);
-            $template = 'const ' . $template .PHP_EOL . PHP_EOL . TAB;
-            $str .= $template;
+            $template = 'const ' . $template;
+            $data[] = $template;
         }
 
-
-        $str = rtrim($str, PHP_EOL . PHP_EOL . TAB);
+        $str = implode(PHP_EOL . PHP_EOL . TAB, $data);
 
         return $this->replaceContent($keyword , $str, $content);
     }

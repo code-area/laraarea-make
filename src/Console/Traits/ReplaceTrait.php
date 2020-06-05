@@ -66,7 +66,6 @@ trait ReplaceTrait
      */
     protected $stage  = 0;
 
-
     /**
      * @param $content
      * @return mixed
@@ -79,6 +78,7 @@ trait ReplaceTrait
 //        Config::set(self::CONFIG_MAKES_PATH, $makes);
 
         foreach ($this->keywords as $keyword => $inputType) {
+            $this->keyword = $keyword;
             if ($this->reportKeywords) {
                 $this->info($keyword);
             }
@@ -124,6 +124,7 @@ trait ReplaceTrait
         $keywords = array_keys($this->keywords);
         // @TODO dry
         foreach ($keywords as $keyword) {
+            $this->keyword = $keyword;
             $_keyword = $this->getKeywordTemplate($keyword);
 
             if (! Str::contains($content, $_keyword)) {
@@ -144,6 +145,7 @@ trait ReplaceTrait
         }
 
         foreach ($keywords as $keyword) {
+            $this->keyword = $keyword;
             if (Str::contains($content, $keyword)) {
                 $content = $this->replaceContent($this->getKeywordTemplate($keyword), '', $content);
             }
@@ -236,6 +238,8 @@ trait ReplaceTrait
         } else {
             $content = str_replace($from, '<error>' . $from . '</error><info>'. $to . '</info>', $content);
         }
+        $content .= ' test';
+        $content = str_replace(' ', '<info>-</info>', $content);
         $this->line($content);
         $this->comment(sprintf('Replaced [%s] times by [%s] method', $this->stage, $backtrace['function']));
 

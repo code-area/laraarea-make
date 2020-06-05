@@ -2,7 +2,7 @@
 
 namespace LaraAreaMake\ServiceProvider;
 //
-use LaraAreaMake\Console\Commands\App\Models\MakeModel;
+use LaraAreaMake\Console\Commands\MakeModel;
 use LaraAreaSupport\LaraAreaServiceProvider;
 
 class LaraAreaMakeServiceProvider extends LaraAreaServiceProvider

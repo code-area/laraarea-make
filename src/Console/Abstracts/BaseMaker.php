@@ -253,24 +253,23 @@ abstract class BaseMaker extends Command
             throw new LaraAreaCommandException($message);
         }
 
-        return $this->getStubContentByStubPath($this->stub);
+        $path = $this->getStubPath();
+        return $this->files->get($path);
     }
 
     /**
-     * Get stub content based
-     *
-     * @param $stub
-     * @return string
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     * @return bool|string
      * @throws \ReflectionException
      */
-    public function getStubContentByStubPath($stub)
+    public function getStubPath()
     {
-        $reflector = new \ReflectionClass(get_class($this));
-        $fn = $reflector->getFileName();
-        $callPath = dirname($fn);
-        $path = $this->getCommandPath($callPath);
-        $path .= 'stubs' . DIRECTORY_SEPARATOR . $stub;
+        $path = base_path($this->stub);
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        $stub = $this->stub;
+        $path = app_path('Console' . DIRECTORY_SEPARATOR . 'stubs' . DIRECTORY_SEPARATOR . $stub);
 
         if (! file_exists($path)) {
             $reflector = new \ReflectionClass(self::class);
@@ -280,9 +279,7 @@ abstract class BaseMaker extends Command
             $path .= 'stubs' . DIRECTORY_SEPARATOR . $stub;
         }
 
-        $stub = $this->files->get($path);
-
-        return $stub;
+        return $path;
     }
 
     /**
@@ -572,6 +569,32 @@ abstract class BaseMaker extends Command
         $option =  parent::option($key);
         $option = $this->parser->parseInput($key, $option);
         return $this->processInput($key, $option);
+    }
+
+    /**
+     * @param null $key
+     * @return array|string|null
+     */
+    public function initialArgument($key = null)
+    {
+        if (is_null($key)) {
+            return $this->input->getArguments();
+        }
+
+        return $this->input->getArgument($key);
+    }
+
+    /**
+     * @param null $key
+     * @return array|bool|string|null
+     */
+    public function initialOption($key = null)
+    {
+        if (is_null($key)) {
+            return $this->input->getOptions();
+        }
+
+        return $this->input->getOption($key);
     }
 
     /**

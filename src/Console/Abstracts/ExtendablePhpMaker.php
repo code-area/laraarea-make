@@ -3,6 +3,7 @@
 namespace LaraAreaMake\Console\Abstracts;
 
 use LaraAreaMake\Console\Traits\Keywords\MethodKeywordTrait;
+use \LaraAreaMake\Exceptions\LaraAreaCommandException;
 
 abstract class ExtendablePhpMaker extends PhpMaker
 {
@@ -47,9 +48,16 @@ abstract class ExtendablePhpMaker extends PhpMaker
     public $parent;
 
     /**
+     * @var array
+     */
+    public $baseImmutableKeywords = [
+        '__parent'
+    ];
+
+    /**
      * @return mixed|string
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     * @throws \LaraAreaMake\Exceptions\LaraAreaCommandException
+     * @throws LaraAreaCommandException
      * @throws \ReflectionException
      */
     public function getStubContent()
@@ -85,7 +93,7 @@ abstract class ExtendablePhpMaker extends PhpMaker
      * @param $patterns
      * @param $stubContent
      * @return bool
-     * @throws \LaraAreaMake\Exceptions\LaraAreaCommandException
+     * @throws LaraAreaCommandException
      */
     public function fillPatterns($patterns, $stubContent)
     {
@@ -101,7 +109,7 @@ abstract class ExtendablePhpMaker extends PhpMaker
     /**
      * @param $stubContent
      * @return int|null
-     * @throws \LaraAreaMake\Exceptions\LaraAreaCommandException
+     * @throws LaraAreaCommandException
      */
     public function createBaseParent($stubContent)
     {
@@ -115,19 +123,12 @@ abstract class ExtendablePhpMaker extends PhpMaker
                 $this->__method = [];
             }
         } else {
-            $keywordValues = $this->getKeywordValues();
-            foreach ($keywordValues as $keyword => $value) {
-                if ($keyword == '__parent') {
-                    continue;
-                }
-                $this->{$keyword} = null;
-            }
-
+            $this->processKeywordsValuesForBase();
             $result = $this->createFileBy($baseParent, $stubContent);
             $baseParent = $this->getBaseParent();
-            $this->__parent = $this->__namespace . DIRECTORY_SEPARATOR . $baseParent;
+            $this->__parent = $this->parent = $this->__namespace . DIRECTORY_SEPARATOR . $baseParent;
 
-            foreach ($keywordValues as $keyword => $value) {
+            foreach ($this->getKeywordValues() as $keyword => $value) {
                 if ($keyword == '__parent') {
                     continue;
                 }
@@ -136,6 +137,27 @@ abstract class ExtendablePhpMaker extends PhpMaker
         }
 
         return $result;
+    }
+
+    /**
+     *
+     */
+    protected function processKeywordsValuesForBase()
+    {
+        foreach ($this->getKeywordValues() as $keyword => $value) {
+            if (in_array($keyword, $this->getBaseImmutableKeywords())) {
+                continue;
+            }
+            $this->{$keyword} = null;
+        }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getBaseImmutableKeywords()
+    {
+        return $this->baseImmutableKeywords;
     }
 
     /**

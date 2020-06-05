@@ -175,6 +175,10 @@ trait ProcessInputTrait
      */
     public function finalProcessInput($key, $value)
     {
+        if (is_null($key)) {
+            return $value;
+        }
+
         $fixKeywordMethod = $this->getDynamicMethod($this->processInputMethod, $key);
         if (method_exists($this, $fixKeywordMethod)) {
             return  $this->{$fixKeywordMethod}($value);

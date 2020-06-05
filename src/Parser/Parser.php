@@ -29,13 +29,16 @@ class Parser
      */
     public function parseInput($key, $value)
     {
+        if (is_null($key)) {
+            return $value;
+        }
+
         if (is_bool($value)) {
             return $value;
         }
 
         if (is_array($value)) {
-            // @TODO
-            dd('@TODO');
+            return $value; // TODO process
         }
 
         $starts = $this->arrayInputConfig['starts'];
@@ -71,6 +74,10 @@ class Parser
         return "$attribute $separator " . $this->fixValue($data) . $suffix;
     }
 
+    /**
+     * @param $value
+     * @return string
+     */
     protected function fixValue($value) {
 
         if (is_null($value)) {
@@ -93,10 +100,8 @@ class Parser
             return $value;
         }
 
-        if (is_object($value)) {
-            dd('New type fix it', $value);
-        }
-
+        // TODO New type fix it', $value;
+        return $value;
     }
 
     /**
@@ -132,6 +137,11 @@ class Parser
         return $result;
     }
 
+    /**
+     * @param $string
+     * @param bool $depth
+     * @return string
+     */
     protected function fixDepth(&$string, $depth = false)
     {
         if (! Str::endsWith($string, PHP_EOL)) {

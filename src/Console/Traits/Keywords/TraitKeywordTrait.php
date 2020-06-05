@@ -10,6 +10,11 @@ trait TraitKeywordTrait
     protected $__trait;
 
     /**
+     * @var
+     */
+    public $traitNewLineCount = 3;
+
+    /**
      * @param $content
      * @param $keyword
      * @param $input
@@ -28,7 +33,13 @@ trait TraitKeywordTrait
             $traits[] = $this->processNamespace($trait);
         }
 
-        $to = sprintf('use %s;', implode(', ', $traits));
+        if (strlen(implode($traits)) > 50) {
+            $separator = ',' . PHP_EOL . TAB . TAB;
+        } else {
+            $separator =  (count($traits) > $this->traitNewLineCount) ? ',' . PHP_EOL . TAB . TAB : ', ';
+        }
+
+        $to = sprintf('use %s;', implode($separator, $traits));
         return $this->replaceContent($keyword, $to, $content);
     }
 
