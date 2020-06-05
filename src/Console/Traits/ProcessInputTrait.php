@@ -384,7 +384,7 @@ trait ProcessInputTrait
         if ($suffixLen < $this->checkSuffixLength) {
             // @TODO Dry
             $substring = substr($pattern, -strlen($suffix));
-            if (ucfirst($substring) === $suffix) {
+            if ($substring === $suffix) {
                 return \Illuminate\Support\Str::replaceLast($substring, '', $pattern);
             }
         }
@@ -393,7 +393,7 @@ trait ProcessInputTrait
             $partialSuffix = substr($suffix, 0, $len);
             // @TODO Dry
             $substring = substr($pattern, -strlen($partialSuffix));
-            if (ucfirst($substring) === $partialSuffix) {
+            if ($substring === $partialSuffix) {
                 return \Illuminate\Support\Str::replaceLast($substring, '', $pattern);
             }
         }

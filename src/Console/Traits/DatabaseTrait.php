@@ -54,13 +54,15 @@ trait DatabaseTrait
     {
         $this->dbStructure = collect($dbStructure);
         foreach ($dbStructure as $table => $columnsInfo) {
+            $this->setArguments();
             $this->setOptions();
             $this->__confirm = true;
             $this->__confirmOverwrite = true;
             $this->__choiceDefault = true;
 
-            $this->setArguments();
             $this->__pattern = $this->processInput('pattern', $table);
+            $this->table = $table;
+            $this->tableColumns = $columnsInfo;
             $this->setDatabaseOptions($table, $columnsInfo);
             $this->createFileBy($this->__pattern, $content);
         }
@@ -73,10 +75,7 @@ trait DatabaseTrait
      */
     protected function setDatabaseOptions($table, $columnsInfo)
     {
-        $this->__pattern = $this->processInput('pattern', $table);
-        $this->pattern = $this->__pattern;
-        $this->table = $table;
-        $this->tableColumns = $columnsInfo;
+
     }
 
     /**
